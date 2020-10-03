@@ -21,6 +21,7 @@
 #include "logger.h"
 #include "configfile.h"
 #include "ocsnavigationappsjob.h"
+#include "userstatus.h"
 
 #include <QSettings>
 #include <QTimer>
@@ -44,6 +45,7 @@ AccountState::AccountState(AccountPtr account)
     , _waitingForNewCredentials(false)
     , _maintenanceToConnectedDelay(60000 + (qrand() % (4 * 60000))) // 1-5min delay
     , _remoteWipe(new RemoteWipe(_account))
+    , _userStatus(new UserStatus(this, this))
 {
     qRegisterMetaType<AccountState *>("AccountState*");
 
@@ -58,6 +60,7 @@ AccountState::AccountState(AccountPtr account)
         // Get the Apps available on the server if we're now connected.
         if (isConnected()) {
             fetchNavigationApps();
+            _userStatus->fetchCurrentStatus();
         }
     });
 }
@@ -123,6 +126,11 @@ void AccountState::setState(State state)
 
     // might not have changed but the underlying _connectionErrors might have
     emit stateChanged(_state);
+}
+
+QString AccountState::currentStatus() const
+{
+    return _userStatus->currentStatus();
 }
 
 QString AccountState::stateString(State state)
