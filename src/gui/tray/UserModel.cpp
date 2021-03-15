@@ -53,6 +53,7 @@ User::User(AccountStatePtr &account, const bool &isCurrent, QObject *parent)
     connect(this, &User::guiLog, Logger::instance(), &Logger::guiLog);
 
     connect(_account->account().data(), &Account::accountChangedAvatar, this, &User::avatarChanged);
+    connect(_account.data(), &AccountState::userStatusChanged, this, &User::userStatusChanged);
 
     connect(_activityModel, &ActivityListModel::sendNotificationRequest, this, &User::slotSendNotificationRequest);
 }
@@ -87,7 +88,7 @@ void User::slotBuildNotificationDisplay(const ActivityList &list)
 
             // Assemble a tray notification for the NEW notification
             ConfigFile cfg;
-            if (cfg.optionalServerNotifications()) {
+            if (cfg.optionalServerNotifications() /*and header is not X-Nextcloud-User-Status*/) {
                 if (AccountManager::instance()->accounts().count() == 1) {
                     emit guiLog(activity._subject, "");
                 } else {
@@ -207,6 +208,7 @@ void User::slotRefresh()
             slotRefreshActivities();
         }
         slotRefreshNotifications();
+        _account.data()->fetchCurrentUserStatus();
         timer.start();
     }
 }
@@ -557,9 +559,9 @@ QString User::server(bool shortened) const
     return serverUrl;
 }
 
-QString User::currentStatus() const
+QString User::currentUserStatus() const
 {
-    return _account->currentStatus();
+    return _account->currentUserStatus();
 }
 
 QImage User::avatar() const
@@ -708,6 +710,10 @@ void UserModel::addUser(AccountStatePtr &user, const bool &isCurrent)
            emit dataChanged(index(row, 0), index(row, 0), {UserModel::AvatarRole});
         });
 
+        connect(u, &User::userStatusChanged, this, [this, row] {
+            emit dataChanged(index(row, 0), index(row, 0), {UserModel::StatusRole});
+        });
+
         _users << u;
         if (isCurrent) {
             _currentUserId = _users.indexOf(_users.last());
@@ -847,7 +853,7 @@ QVariant UserModel::data(const QModelIndex &index, int role) const
     } else if (role == ServerRole) {
         return _users[index.row()]->server();
     } else if (role == StatusRole) {
-        return _users[index.row()]->currentStatus();
+        return _users[index.row()]->currentUserStatus();
     } else if (role == AvatarRole) {
         return _users[index.row()]->avatarUrl();
     } else if (role == IsCurrentUserRole) {

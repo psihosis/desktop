@@ -29,40 +29,44 @@ namespace OCC {
 UserStatus::UserStatus(AccountState *accountState, QObject *parent)
     : QObject(parent)
     , _accountState(accountState)
-    , _currentStatus(QStringLiteral("Offline"))
 {
+    connect(this, &UserStatus::fetchedCurrentUserStatus, _accountState, &AccountState::userStatusChanged);
 }
 
-void UserStatus::slotRequestFailed()
-{
-}
-
-void UserStatus::fetchCurrentStatus()
+void UserStatus::fetchCurrentUserStatus()
 {
     if (_job) {
-        // The previous job was not finished?  Then we cancel it!
         _job->deleteLater();
     }
 
     AccountPtr account = _accountState->account();
     _job = new JsonApiJob(account, QStringLiteral("/ocs/v2.php/apps/user_status/api/v1/user_status"), this);
     connect(_job.data(), &JsonApiJob::jsonReceived, this, &UserStatus::slotFetchedCurrentStatus);
-    connect(_job.data(), &AbstractNetworkJob::networkError, this, &UserStatus::slotRequestFailed);
     _job->start();
 }
 
 void UserStatus::slotFetchedCurrentStatus(const QJsonDocument &json)
 {
-    const auto objData = json.object().value("ocs").toObject().value("data").toObject();
-    _currentStatus = objData.value("status").toString();
-    //objData.value("id").toString();
+    const auto retrievedData = json.object().value("ocs").toObject().value("data").toObject();
+    const auto icon = retrievedData.value("icon").toString();
+    const auto message = retrievedData.value("message").toString();
+    auto status = retrievedData.value("status").toString();
 
-    //emit fetchedCurrentStatus(this);
+    if(message.isEmpty()) {
+        if(status == "dnd") {
+            status = tr("Do not disturb");
+        }
+    } else {
+        status = message;
+    }
+
+    _currentUserStatus = QString("%1 %2").arg(icon, status);
+    emit fetchedCurrentUserStatus();
 }
 
-QString UserStatus::currentStatus() const
+QString UserStatus::currentUserStatus() const
 {
-    return _currentStatus;
+    return _currentUserStatus;
 }
 
 } // namespace OCC

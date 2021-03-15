@@ -60,7 +60,6 @@ AccountState::AccountState(AccountPtr account)
         // Get the Apps available on the server if we're now connected.
         if (isConnected()) {
             fetchNavigationApps();
-            _userStatus->fetchCurrentStatus();
         }
     });
 }
@@ -128,9 +127,9 @@ void AccountState::setState(State state)
     emit stateChanged(_state);
 }
 
-QString AccountState::currentStatus() const
+QString AccountState::currentUserStatus() const
 {
-    return _userStatus->currentStatus();
+    return _userStatus->currentUserStatus();
 }
 
 QString AccountState::stateString(State state)
@@ -428,6 +427,10 @@ void AccountState::fetchNavigationApps(){
     connect(job, &OcsNavigationAppsJob::etagResponseHeaderReceived, this, &AccountState::slotEtagResponseHeaderReceived);
     connect(job, &OcsNavigationAppsJob::ocsError, this, &AccountState::slotOcsError);
     job->getNavigationApps();
+}
+
+void AccountState::fetchCurrentUserStatus() {
+    _userStatus->fetchCurrentUserStatus();
 }
 
 void AccountState::slotEtagResponseHeaderReceived(const QByteArray &value, int statusCode){

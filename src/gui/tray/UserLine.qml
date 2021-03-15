@@ -110,7 +110,7 @@ MenuItem {
                             font.bold: true
                         }
                         Label {
-                            id: accountStatus
+                            id: userStatus
                             width: 128
                             text: status
                             elide: Text.ElideRight

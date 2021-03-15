@@ -26,22 +26,22 @@ class JsonApiJob;
 class UserStatus : public QObject
 {
     Q_OBJECT
+
 public:
     explicit UserStatus(AccountState *accountState, QObject *parent = nullptr);
-    QString currentStatus() const;
-    void fetchCurrentStatus();
+    void fetchCurrentUserStatus();
+    QString currentUserStatus() const;
 
 private slots:
     void slotFetchedCurrentStatus(const QJsonDocument &json);
-    void slotRequestFailed();
 
 signals:
-    void fetchedCurrentStatus(UserStatus *userStatus);
+    void fetchedCurrentUserStatus();
 
 private:
     QPointer<AccountState> _accountState;
     QPointer<JsonApiJob> _job; // the currently running job
-    QString _currentStatus;
+    QString _currentUserStatus;
 };
 
 
