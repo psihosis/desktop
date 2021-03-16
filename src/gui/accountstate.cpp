@@ -46,6 +46,7 @@ AccountState::AccountState(AccountPtr account)
     , _maintenanceToConnectedDelay(60000 + (qrand() % (4 * 60000))) // 1-5min delay
     , _remoteWipe(new RemoteWipe(_account))
     , _userStatus(new UserStatus(this, this))
+    , _doNotDisturbStatus("online")
 {
     qRegisterMetaType<AccountState *>("AccountState*");
 
@@ -210,6 +211,16 @@ QByteArray AccountState::navigationAppsEtagResponseHeader() const
 void AccountState::setNavigationAppsEtagResponseHeader(const QByteArray &value)
 {
     _navigationAppsEtagResponseHeader = value;
+}
+
+QString AccountState::doNotDisturbStatus() const
+{
+    return _doNotDisturbStatus;
+}
+
+void AccountState::setDoNotDisturbStatus(const QString &status)
+{
+    _doNotDisturbStatus = status;
 }
 
 void AccountState::checkConnectivity()

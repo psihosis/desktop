@@ -163,6 +163,8 @@ public:
     void handleInvalidCredentials();
 
     QString currentUserStatus() const;
+    QString doNotDisturbStatus() const;
+    void setDoNotDisturbStatus(const QString &status);
 
     void fetchCurrentUserStatus();
 
@@ -230,6 +232,7 @@ private:
     AccountAppList _apps;
 
     UserStatus *_userStatus;
+    QString _doNotDisturbStatus;
 };
 
 class AccountApp : public QObject

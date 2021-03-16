@@ -88,7 +88,8 @@ void User::slotBuildNotificationDisplay(const ActivityList &list)
 
             // Assemble a tray notification for the NEW notification
             ConfigFile cfg;
-            if (cfg.optionalServerNotifications() /*and header is not X-Nextcloud-User-Status*/) {
+            if (cfg.optionalServerNotifications() &&
+                    _account.data()->doNotDisturbStatus() == "online") {
                 if (AccountManager::instance()->accounts().count() == 1) {
                     emit guiLog(activity._subject, "");
                 } else {
