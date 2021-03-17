@@ -88,8 +88,7 @@ void User::slotBuildNotificationDisplay(const ActivityList &list)
 
             // Assemble a tray notification for the NEW notification
             ConfigFile cfg;
-            if (cfg.optionalServerNotifications() &&
-                    _account.data()->doNotDisturbStatus() == "online") {
+            if (cfg.optionalServerNotifications() && isUserStatusOnline()) {
                 if (AccountManager::instance()->accounts().count() == 1) {
                     emit guiLog(activity._subject, "");
                 } else {
@@ -614,6 +613,12 @@ bool User::isConnected() const
     return (_account->connectionStatus() == AccountState::ConnectionStatus::Connected);
 }
 
+
+bool User::isUserStatusOnline() const
+{
+    return (_account.data()->doNotDisturbStatus() == "online");
+}
+
 void User::removeAccount() const
 {
     AccountManager::instance()->deleteAccount(_account.data());
@@ -674,6 +679,15 @@ Q_INVOKABLE bool UserModel::isUserConnected(const int &id)
 
     return _users[id]->isConnected();
 }
+
+Q_INVOKABLE bool UserModel::isUserStatusOnline(const int &id)
+{
+    if (id < 0 || id >= _users.size())
+        return false;
+
+    return _users[id]->isUserStatusOnline();
+}
+
 
 QImage UserModel::avatarById(const int &id)
 {

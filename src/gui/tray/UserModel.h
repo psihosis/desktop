@@ -47,6 +47,7 @@ public:
     void logout() const;
     void removeAccount() const;
     QString avatarUrl() const;
+    bool isUserStatusOnline() const;
 
 signals:
     void guiLog(const QString &, const QString &);
@@ -135,6 +136,7 @@ public:
     Q_INVOKABLE bool currentUserHasLocalFolder();
     int currentUserId() const;
     Q_INVOKABLE bool isUserConnected(const int &id);
+    Q_INVOKABLE bool isUserStatusOnline(const int &id);
     Q_INVOKABLE void switchCurrentUser(const int &id);
     Q_INVOKABLE void login(const int &id);
     Q_INVOKABLE void logout(const int &id);

@@ -42,6 +42,10 @@ class OWNCLOUDSYNC_EXPORT Theme : public QObject
     Q_PROPERTY(QString appName READ appName CONSTANT)
     Q_PROPERTY(QUrl stateOnlineImageSource READ stateOnlineImageSource CONSTANT)
     Q_PROPERTY(QUrl stateOfflineImageSource READ stateOfflineImageSource CONSTANT)
+    Q_PROPERTY(QUrl statusOnlineImageSource READ statusOnlineImageSource CONSTANT)
+    Q_PROPERTY(QUrl statusDoNotDisturbImageSource READ statusDoNotDisturbImageSource CONSTANT)
+    Q_PROPERTY(QUrl statusAwayImageSource READ statusAwayImageSource CONSTANT)
+    Q_PROPERTY(QUrl statusInvisibleImageSource READ statusInvisibleImageSource CONSTANT)
 #ifndef TOKEN_AUTH_ONLY
     Q_PROPERTY(QIcon folderDisabledIcon READ folderDisabledIcon CONSTANT)
     Q_PROPERTY(QIcon folderOfflineIcon READ folderOfflineIcon CONSTANT)
