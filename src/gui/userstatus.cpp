@@ -18,7 +18,7 @@
 #include "networkjobs.h"
 #include "folderman.h"
 #include "creds/abstractcredentials.h"
-#include <theme.h>
+#include "theme.h"
 
 #include <QTimer>
 #include <QJsonDocument>
@@ -29,11 +29,13 @@ namespace OCC {
 UserStatus::UserStatus(AccountState *accountState, QObject *parent)
     : QObject(parent)
     , _accountState(accountState)
+    , _status("online")
+    , _message("")
 {
     connect(this, &UserStatus::fetchedCurrentUserStatus, _accountState, &AccountState::userStatusChanged);
 }
 
-void UserStatus::fetchCurrentUserStatus()
+void UserStatus::fetchStatus()
 {
     if (_job) {
         _job->deleteLater();
@@ -51,6 +53,7 @@ void UserStatus::slotFetchedCurrentStatus(const QJsonDocument &json)
     const auto icon = retrievedData.value("icon").toString();
     const auto message = retrievedData.value("message").toString();
     auto status = retrievedData.value("status").toString();
+    _status = status;
 
     if(message.isEmpty()) {
         if(status == "dnd") {
@@ -60,13 +63,36 @@ void UserStatus::slotFetchedCurrentStatus(const QJsonDocument &json)
         status = message;
     }
 
-    _currentUserStatus = QString("%1 %2").arg(icon, status);
+    _message = QString("%1 %2").arg(icon, status);
     emit fetchedCurrentUserStatus();
 }
 
-QString UserStatus::currentUserStatus() const
+QString UserStatus::status() const
 {
-    return _currentUserStatus;
+    return _status;
+}
+
+QString UserStatus::message() const
+{
+    return _message;
+}
+
+QUrl UserStatus::icon() const
+{
+    // online, away, dnd, invisible, offline
+    if(_status == "online") {
+        return Theme::instance()->statusOnlineImageSource();
+    } else if (_status == "away") {
+        return Theme::instance()->statusAwayImageSource();
+    } else if (_status == "dnd") {
+        return Theme::instance()->statusDoNotDisturbImageSource();
+    } else if (_status == "invisible") {
+        return Theme::instance()->statusInvisibleImageSource();
+    } else if (_status == "offline") {
+        return Theme::instance()->statusInvisibleImageSource();
+    }
+
+    return Theme::instance()->statusOnlineImageSource();
 }
 
 } // namespace OCC

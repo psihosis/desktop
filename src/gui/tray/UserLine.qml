@@ -81,9 +81,7 @@ MenuItem {
                         }
                         Image {
                             id: accountStatusIndicator
-                            source: model.isStatusOnline
-                                    ? Style.statusOnlineImageSource
-                                    : Style.statusDoNotDisturbImageSource
+                            source: model.statusIcon
                             cache: false
                             x: accountStatusIndicatorBackground.x + 1
                             y: accountStatusIndicatorBackground.y + 1
@@ -110,9 +108,9 @@ MenuItem {
                             font.bold: true
                         }
                         Label {
-                            id: userStatus
+                            id: userStatusMessage
                             width: 128
-                            text: status
+                            text: statusMessage
                             elide: Text.ElideRight
                             color: "black"
                             font.pixelSize: 10
@@ -229,15 +227,6 @@ MenuItem {
                         Accessible.onPressAction: removeAccountButton.clicked()
                     }
                 }
-            }
-        }
-
-        Connections {
-            target: UserModel
-            onRefreshCurrentUserGui: {
-                accountStatusIndicator.source = model.isStatusOnline
-                        ? Style.statusOnlineImageSource
-                        : Style.statusDoNotDisturbImageSource
             }
         }
 }   // MenuItem userLine

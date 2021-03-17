@@ -35,11 +35,6 @@ Window {
     }
 
     onVisibleChanged: {
-        currentAccountStatusIndicator.source = ""
-        currentAccountStatusIndicator.source = UserModel.isUserStatusOnline(UserModel.currentUserId)
-                ? Style.stateOnlineImageSource
-                : Style.statusDoNotDisturbImageSource
-
         folderStateIndicator.source = ""
         folderStateIndicator.source = UserModel.isUserConnected(UserModel.currentUserId)
                 ? Style.stateOnlineImageSource
@@ -54,11 +49,6 @@ Window {
     Connections {
         target: UserModel
         onRefreshCurrentUserGui: {
-            currentAccountStatusIndicator.source = ""
-            currentAccountStatusIndicator.source = UserModel.isUserStatusOnline(UserModel.currentUserId)
-                    ? Style.statusOnlineImageSource
-                    : Style.statusDoNotDisturbImageSource
-
             folderStateIndicator.source = ""
             folderStateIndicator.source = UserModel.isUserConnected(UserModel.currentUserId)
                     ? Style.stateOnlineImageSource
@@ -359,9 +349,7 @@ Window {
 
                             Image {
                                 id: currentAccountStatusIndicator
-                                source: UserModel.isUserStatusOnline(UserModel.currentUserId)
-                                        ? Style.statusOnlineImageSource
-                                        : Style.statusDoNotDisturbImageSource
+                                source: UserModel.currentUser.statusIcon
                                 cache: false
                                 x: currentAccountStatusIndicatorBackground.x + 1
                                 y: currentAccountStatusIndicatorBackground.y + 1
@@ -391,7 +379,7 @@ Window {
                             Label {
                                 id: currentUserStatus
                                 width: Style.currentAccountLabelWidth
-                                text: UserModel.currentUser.status
+                                text: UserModel.currentUser.statusMessage
                                 elide: Text.ElideRight
                                 color: Style.ncTextColor
                                 font.pixelSize: Style.subLinePixelSize

@@ -19,7 +19,8 @@ class User : public QObject
     Q_OBJECT
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
     Q_PROPERTY(QString server READ server CONSTANT)
-    Q_PROPERTY(QString status READ currentUserStatus NOTIFY userStatusChanged)
+    Q_PROPERTY(QUrl statusIcon READ statusIcon NOTIFY userStatusChanged)
+    Q_PROPERTY(QString statusMessage READ statusMessage NOTIFY userStatusChanged)
     Q_PROPERTY(bool hasLocalFolder READ hasLocalFolder NOTIFY hasLocalFolderChanged)
     Q_PROPERTY(bool serverHasTalk READ serverHasTalk NOTIFY serverHasTalkChanged)
     Q_PROPERTY(QString avatar READ avatarUrl NOTIFY avatarChanged)
@@ -36,7 +37,6 @@ public:
     void openLocalFolder();
     QString name() const;
     QString server(bool shortened = true) const;
-    QString currentUserStatus() const;
     bool hasLocalFolder() const;
     bool serverHasTalk() const;
     AccountApp *talkApp() const;
@@ -47,7 +47,10 @@ public:
     void logout() const;
     void removeAccount() const;
     QString avatarUrl() const;
-    bool isStatusOnline() const;
+    bool isNotificationStatusOnline() const;
+    QString status() const;
+    QString statusMessage() const;
+    QUrl statusIcon() const;
 
 signals:
     void guiLog(const QString &, const QString &);
@@ -136,7 +139,8 @@ public:
     Q_INVOKABLE bool currentUserHasLocalFolder();
     int currentUserId() const;
     Q_INVOKABLE bool isUserConnected(const int &id);
-    Q_INVOKABLE bool isUserStatusOnline(const int &id);
+    Q_INVOKABLE bool isNotificationStatusOnline(const int &id);
+    Q_INVOKABLE QUrl statusIcon(const int &id);
     Q_INVOKABLE void switchCurrentUser(const int &id);
     Q_INVOKABLE void login(const int &id);
     Q_INVOKABLE void logout(const int &id);
@@ -147,7 +151,8 @@ public:
     enum UserRoles {
         NameRole = Qt::UserRole + 1,
         ServerRole,
-        StatusRole,
+        StatusIconRole,
+        StatusMessageRole,
         AvatarRole,
         IsCurrentUserRole,
         IsConnectedRole,

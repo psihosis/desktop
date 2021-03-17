@@ -420,7 +420,7 @@ signals:
      * @param statusCode - the OCS status code: 100 (!) for success
      */
     void etagResponseHeaderReceived(const QByteArray &value, int statusCode);
-    void doNotDisturbStatusReceived(const QString &status);
+    void notificationStatusReceived(const QString &status);
 
 private:
     QUrlQuery _additionalParams;

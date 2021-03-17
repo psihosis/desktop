@@ -48,8 +48,8 @@ void ServerNotificationHandler::slotFetchNotifications()
         this, &ServerNotificationHandler::slotNotificationsReceived);
     QObject::connect(_notificationJob.data(), &JsonApiJob::etagResponseHeaderReceived,
         this, &ServerNotificationHandler::slotEtagResponseHeaderReceived);
-    QObject::connect(_notificationJob.data(), &JsonApiJob::doNotDisturbStatusReceived,
-            this, &ServerNotificationHandler::slotDoNotDisturbStatusReceived);
+    QObject::connect(_notificationJob.data(), &JsonApiJob::notificationStatusReceived,
+            this, &ServerNotificationHandler::slotNotificationStatusReceived);
     _notificationJob->setProperty(propertyAccountStateC, QVariant::fromValue<AccountState *>(_accountState));
     _notificationJob->addRawHeader("If-None-Match", _accountState->notificationsEtagResponseHeader());
     _notificationJob->start();
@@ -64,10 +64,10 @@ void ServerNotificationHandler::slotEtagResponseHeaderReceived(const QByteArray 
     }
 }
 
-void ServerNotificationHandler::slotDoNotDisturbStatusReceived(const QString &status)
+void ServerNotificationHandler::slotNotificationStatusReceived(const QString &status)
 {
     auto *account = qvariant_cast<AccountState *>(sender()->property(propertyAccountStateC));
-    account->setDoNotDisturbStatus(status);
+    account->setNotificationStatus(status);
 }
 
 void ServerNotificationHandler::slotIconDownloaded(QByteArray iconData)

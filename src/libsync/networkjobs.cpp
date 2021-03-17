@@ -871,9 +871,9 @@ bool JsonApiJob::finished()
     if(reply()->rawHeaderList().contains("ETag"))
         emit etagResponseHeaderReceived(reply()->rawHeader("ETag"), statusCode);
 
-    const auto userStatus = reply()->rawHeader(QByteArray("X-Nextcloud-User-Status"));
-    if(!userStatus.isEmpty()) {
-        emit doNotDisturbStatusReceived(userStatus);
+    const auto notificationStatus = reply()->rawHeader(QByteArray("X-Nextcloud-User-Status"));
+    if(!notificationStatus.isEmpty()) {
+        emit notificationStatusReceived(notificationStatus);
     }
 
     QJsonParseError error;

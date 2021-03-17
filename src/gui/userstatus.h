@@ -29,8 +29,10 @@ class UserStatus : public QObject
 
 public:
     explicit UserStatus(AccountState *accountState, QObject *parent = nullptr);
-    void fetchCurrentUserStatus();
-    QString currentUserStatus() const;
+    void fetchStatus();
+    QString status() const;
+    QString message() const;
+    QUrl icon() const;
 
 private slots:
     void slotFetchedCurrentStatus(const QJsonDocument &json);
@@ -41,7 +43,8 @@ signals:
 private:
     QPointer<AccountState> _accountState;
     QPointer<JsonApiJob> _job; // the currently running job
-    QString _currentUserStatus;
+    QString _status;
+    QString _message;
 };
 
 

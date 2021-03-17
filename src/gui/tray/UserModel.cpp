@@ -88,7 +88,7 @@ void User::slotBuildNotificationDisplay(const ActivityList &list)
 
             // Assemble a tray notification for the NEW notification
             ConfigFile cfg;
-            if (cfg.optionalServerNotifications() && isStatusOnline()) {
+            if (cfg.optionalServerNotifications() && isNotificationStatusOnline()) {
                 if (AccountManager::instance()->accounts().count() == 1) {
                     emit guiLog(activity._subject, "");
                 } else {
@@ -208,7 +208,7 @@ void User::slotRefresh()
             slotRefreshActivities();
         }
         slotRefreshNotifications();
-        _account.data()->fetchCurrentUserStatus();
+        _account.data()->fetchUserStatus();
         timer.start();
     }
 }
@@ -559,9 +559,19 @@ QString User::server(bool shortened) const
     return serverUrl;
 }
 
-QString User::currentUserStatus() const
+QString User::status() const
 {
-    return _account->currentUserStatus();
+    return _account->status();
+}
+
+QString User::statusMessage() const
+{
+    return _account->statusMessage();
+}
+
+QUrl User::statusIcon() const
+{
+    return _account->statusIcon();
 }
 
 QImage User::avatar() const
@@ -614,9 +624,9 @@ bool User::isConnected() const
 }
 
 
-bool User::isStatusOnline() const
+bool User::isNotificationStatusOnline() const
 {
-    return (_account.data()->doNotDisturbStatus() == "online");
+    return (_account.data()->notificationStatus() == "online");
 }
 
 void User::removeAccount() const
@@ -680,12 +690,20 @@ Q_INVOKABLE bool UserModel::isUserConnected(const int &id)
     return _users[id]->isConnected();
 }
 
-Q_INVOKABLE bool UserModel::isUserStatusOnline(const int &id)
+Q_INVOKABLE bool UserModel::isNotificationStatusOnline(const int &id)
 {
     if (id < 0 || id >= _users.size())
         return false;
 
-    return _users[id]->isStatusOnline();
+    return _users[id]->isNotificationStatusOnline();
+}
+
+Q_INVOKABLE QUrl UserModel::statusIcon(const int &id)
+{
+    if (id < 0 || id >= _users.size())
+        return {};
+
+    return _users[id]->statusIcon();
 }
 
 
@@ -726,7 +744,8 @@ void UserModel::addUser(AccountStatePtr &user, const bool &isCurrent)
         });
 
         connect(u, &User::userStatusChanged, this, [this, row] {
-            emit dataChanged(index(row, 0), index(row, 0), {UserModel::StatusRole});
+            emit dataChanged(index(row, 0), index(row, 0), {UserModel::StatusIconRole});
+            emit dataChanged(index(row, 0), index(row, 0), {UserModel::StatusMessageRole});
         });
 
         _users << u;
@@ -867,8 +886,10 @@ QVariant UserModel::data(const QModelIndex &index, int role) const
         return _users[index.row()]->name();
     } else if (role == ServerRole) {
         return _users[index.row()]->server();
-    } else if (role == StatusRole) {
-        return _users[index.row()]->currentUserStatus();
+    } else if (role == StatusIconRole) {
+        return _users[index.row()]->statusIcon();
+    } else if (role == StatusMessageRole) {
+        return _users[index.row()]->statusMessage();
     } else if (role == AvatarRole) {
         return _users[index.row()]->avatarUrl();
     } else if (role == IsCurrentUserRole) {
@@ -886,7 +907,8 @@ QHash<int, QByteArray> UserModel::roleNames() const
     QHash<int, QByteArray> roles;
     roles[NameRole] = "name";
     roles[ServerRole] = "server";
-    roles[StatusRole] = "status";
+    roles[StatusIconRole] = "statusIcon";
+    roles[StatusMessageRole] = "statusMessage";
     roles[AvatarRole] = "avatar";
     roles[IsCurrentUserRole] = "isCurrentUser";
     roles[IsConnectedRole] = "isConnected";
