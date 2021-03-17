@@ -47,7 +47,7 @@ public:
     void logout() const;
     void removeAccount() const;
     QString avatarUrl() const;
-    bool isUserStatusOnline() const;
+    bool isStatusOnline() const;
 
 signals:
     void guiLog(const QString &, const QString &);

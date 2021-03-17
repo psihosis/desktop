@@ -88,7 +88,7 @@ void User::slotBuildNotificationDisplay(const ActivityList &list)
 
             // Assemble a tray notification for the NEW notification
             ConfigFile cfg;
-            if (cfg.optionalServerNotifications() && isUserStatusOnline()) {
+            if (cfg.optionalServerNotifications() && isStatusOnline()) {
                 if (AccountManager::instance()->accounts().count() == 1) {
                     emit guiLog(activity._subject, "");
                 } else {
@@ -614,7 +614,7 @@ bool User::isConnected() const
 }
 
 
-bool User::isUserStatusOnline() const
+bool User::isStatusOnline() const
 {
     return (_account.data()->doNotDisturbStatus() == "online");
 }
@@ -685,7 +685,7 @@ Q_INVOKABLE bool UserModel::isUserStatusOnline(const int &id)
     if (id < 0 || id >= _users.size())
         return false;
 
-    return _users[id]->isUserStatusOnline();
+    return _users[id]->isStatusOnline();
 }
 
 

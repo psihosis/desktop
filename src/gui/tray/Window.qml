@@ -35,8 +35,13 @@ Window {
     }
 
     onVisibleChanged: {
-        currentAccountStateIndicator.source = ""
-        currentAccountStateIndicator.source = UserModel.isUserConnected(UserModel.currentUserId)
+        currentAccountStatusIndicator.source = ""
+        currentAccountStatusIndicator.source = UserModel.isUserStatusOnline(UserModel.currentUserId)
+                ? Style.stateOnlineImageSource
+                : Style.statusDoNotDisturbImageSource
+
+        folderStateIndicator.source = ""
+        folderStateIndicator.source = UserModel.isUserConnected(UserModel.currentUserId)
                 ? Style.stateOnlineImageSource
                 : Style.stateOfflineImageSource
 
@@ -49,8 +54,13 @@ Window {
     Connections {
         target: UserModel
         onRefreshCurrentUserGui: {
-            currentAccountStateIndicator.source = ""
-            currentAccountStateIndicator.source = UserModel.isUserConnected(UserModel.currentUserId)
+            currentAccountStatusIndicator.source = ""
+            currentAccountStatusIndicator.source = UserModel.isUserStatusOnline(UserModel.currentUserId)
+                    ? Style.statusOnlineImageSource
+                    : Style.statusDoNotDisturbImageSource
+
+            folderStateIndicator.source = ""
+            folderStateIndicator.source = UserModel.isUserConnected(UserModel.currentUserId)
                     ? Style.stateOnlineImageSource
                     : Style.stateOfflineImageSource
         }
@@ -328,7 +338,7 @@ Window {
                             Accessible.name: qsTr("Current user avatar")
 
                             Rectangle {
-                                id: currentAccountStateIndicatorBackground
+                                id: currentAccountStatusIndicatorBackground
                                 width: Style.accountAvatarStateIndicatorSize + 2
                                 height: width
                                 anchors.bottom: currentAccountAvatar.bottom
@@ -348,18 +358,18 @@ Window {
                             }
 
                             Image {
-                                id: currentAccountStateIndicator
-                                source: UserModel.isUserConnected(UserModel.currentUserId)
-                                        ? Style.stateOnlineImageSource
-                                        : Style.stateOfflineImageSource
+                                id: currentAccountStatusIndicator
+                                source: UserModel.isUserStatusOnline(UserModel.currentUserId)
+                                        ? Style.statusOnlineImageSource
+                                        : Style.statusDoNotDisturbImageSource
                                 cache: false
-                                x: currentAccountStateIndicatorBackground.x + 1
-                                y: currentAccountStateIndicatorBackground.y + 1
+                                x: currentAccountStatusIndicatorBackground.x + 1
+                                y: currentAccountStatusIndicatorBackground.y + 1
                                 sourceSize.width: Style.accountAvatarStateIndicatorSize
                                 sourceSize.height: Style.accountAvatarStateIndicatorSize
 
                                 Accessible.role: Accessible.Indicator
-                                Accessible.name: UserModel.isUserConnected(UserModel.currentUserId()) ? qsTr("Connected") : qsTr("Disconnected")
+                                Accessible.name: UserModel.isUserStatusOnline(UserModel.currentUserId()) ? qsTr("Current user status is online") : qsTr("Current user status is do not disturb")
                             }
                         }
 
@@ -421,6 +431,42 @@ Window {
                     Accessible.role: Accessible.Button
                     Accessible.name: qsTr("Open local folder of current account")
                     Accessible.onPressAction: openLocalFolderButton.clicked()
+                }
+
+                Rectangle {
+                    id: folderStateIndicatorBackground
+                    width: Style.folderStateIndicatorSize
+                    height: width
+                    anchors.top: openLocalFolderButton.verticalCenter
+                    anchors.left: openLocalFolderButton.horizontalCenter
+                    color: Style.ncBlue
+                    radius: width*0.5
+                }
+
+                Rectangle {
+                    id: folderStateRectangle
+                    width: Style.folderStateIndicatorSize
+                    height: width
+                    anchors.bottom: openLocalFolderButton.bottom
+                    anchors.right: openLocalFolderButton.right
+                    color: openLocalFolderButton.containsMouse ? "white" : "transparent"
+                    opacity: 0.2
+                    radius: width*0.5
+                }
+
+                Image {
+                    id: folderStateIndicator
+                    source: UserModel.isUserConnected(UserModel.currentUserId)
+                            ? Style.stateOnlineImageSource
+                            : Style.stateOfflineImageSource
+                    cache: false
+                    x: folderStateIndicatorBackground.x
+                    y: folderStateIndicatorBackground.y
+                    sourceSize.width: Style.folderStateIndicatorSize
+                    sourceSize.height: Style.folderStateIndicatorSize
+
+                    Accessible.role: Accessible.Indicator
+                    Accessible.name: UserModel.isUserConnected(UserModel.currentUserId()) ? qsTr("Connected") : qsTr("Disconnected")
                 }
 
                 HeaderButton {

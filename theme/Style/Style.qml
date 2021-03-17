@@ -30,9 +30,14 @@ QtObject {
 
     property url stateOnlineImageSource: Theme.stateOnlineImageSource
     property url stateOfflineImageSource: Theme.stateOfflineImageSource
+    property url statusOnlineImageSource: Theme.statusOnlineImageSource
+    property url statusDoNotDisturbImageSource: Theme.statusDoNotDisturbImageSource
+    property url statusAwayImageSource: Theme.statusAwayImageSource
+    property url statusInvisibleImageSource: Theme.statussInvisibleImageSource
 
     property int accountAvatarSize: (trayWindowHeaderHeight - 16)
     property int accountAvatarStateIndicatorSize: 16
+    property int folderStateIndicatorSize: 16
     property int accountLabelWidth: 128
 
     property int accountDropDownCaretSize: 20

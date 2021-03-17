@@ -35,7 +35,7 @@ MenuItem {
                     anchors.fill: parent
                     hoverEnabled: true
                     onContainsMouseChanged: {
-                        accountStateIndicatorBackground.color = (containsMouse ? "#f6f6f6" : "white")
+                        accountStatusIndicatorBackground.color = (containsMouse ? "#f6f6f6" : "white")
                     }
                     onClicked: {
                         if (!isCurrentUser) {
@@ -71,8 +71,8 @@ MenuItem {
                         Layout.preferredHeight: (userLineLayout.height -16)
                         Layout.preferredWidth: (userLineLayout.height -16)
                         Rectangle {
-                            id: accountStateIndicatorBackground
-                            width: accountStateIndicator.sourceSize.width + 2
+                            id: accountStatusIndicatorBackground
+                            width: accountStatusIndicator.sourceSize.width + 2
                             height: width
                             anchors.bottom: accountAvatar.bottom
                             anchors.right: accountAvatar.right
@@ -80,18 +80,18 @@ MenuItem {
                             radius: width*0.5
                         }
                         Image {
-                            id: accountStateIndicator
-                            source: model.isConnected
-                                    ? Style.stateOnlineImageSource
-                                    : Style.stateOfflineImageSource
+                            id: accountStatusIndicator
+                            source: model.isStatusOnline
+                                    ? Style.statusOnlineImageSource
+                                    : Style.statusDoNotDisturbImageSource
                             cache: false
-                            x: accountStateIndicatorBackground.x + 1
-                            y: accountStateIndicatorBackground.y + 1
+                            x: accountStatusIndicatorBackground.x + 1
+                            y: accountStatusIndicatorBackground.y + 1
                             sourceSize.width: Style.accountAvatarStateIndicatorSize
                             sourceSize.height: Style.accountAvatarStateIndicatorSize
 
                             Accessible.role: Accessible.Indicator
-                            Accessible.name: model.isConnected ? qsTr("Account connected") : qsTr("Account not connected")
+                            Accessible.name: model.isStatusOnline ? qsTr("Current user status is online") : qsTr("Current user status is do not disturb")
                         }
                     }
 
@@ -235,9 +235,9 @@ MenuItem {
         Connections {
             target: UserModel
             onRefreshCurrentUserGui: {
-                accountStateIndicator.source = model.isConnected
-                        ? Style.stateOnlineImageSource
-                        : Style.stateOfflineImageSource
+                accountStatusIndicator.source = model.isStatusOnline
+                        ? Style.statusOnlineImageSource
+                        : Style.statusDoNotDisturbImageSource
             }
         }
 }   // MenuItem userLine
