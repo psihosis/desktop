@@ -162,10 +162,21 @@ public:
     ///Asks for user credentials
     void handleInvalidCredentials();
 
+    /** Returns the user status Message (emoji + text)
+    */
     QString currentUserStatus() const;
+
+    /** Returns the user status retrieved by the notificatons endpoint: dnd or online
+     *  https://github.com/nextcloud/desktop/issues/2318#issuecomment-680698429
+    */
     QString doNotDisturbStatus() const;
+
+    /** Set new user status retrieved by the notificatons endpoint: dnd or online
+    */
     void setDoNotDisturbStatus(const QString &status);
 
+    /** Fetch the user status Message (emoji + text)
+    */
     void fetchCurrentUserStatus();
 
 public slots:
