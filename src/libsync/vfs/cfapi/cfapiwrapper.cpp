@@ -23,8 +23,6 @@
 #include <QFileInfo>
 #include <QLocalSocket>
 #include <QLoggingCategory>
-#include <QGlobalStatic>
-#include <QMutex>
 
 #include <sddl.h>
 #include <cfapi.h>
@@ -39,9 +37,6 @@ Q_LOGGING_CATEGORY(lcCfApiWrapper, "nextcloud.sync.vfs.cfapi.wrapper", QtInfoMsg
       FIELD_SIZE( CF_OPERATION_PARAMETERS, field ) )
 
 namespace {
-using SyncRootKeys = QMap<QString, QString>;
-Q_GLOBAL_STATIC(SyncRootKeys, registeredSyncRootKeys)
-QMutex registeredSyncRootMutex;
 void cfApiSendTransferInfo(const CF_CONNECTION_KEY &connectionKey, const CF_TRANSFER_KEY &transferKey, NTSTATUS status, void *buffer, qint64 offset, qint64 length)
 {
 
@@ -302,12 +297,12 @@ OCC::Optional<OCC::PinStateEnums::PinState> OCC::CfApiWrapper::PlaceHolderInfo::
     return cfPinStateToPinState(_data->PinState);
 }
 
-QString convertSidToStringSid(_In_ PSID sid)
+QString convertSidToStringSid(void *sid)
 {
     QString result;
+
     wchar_t *stringSid = nullptr;
-    if (::ConvertSidToStringSid(sid, &stringSid))
-    {
+    if (::ConvertSidToStringSid(sid, &stringSid)) {
         result = QString::fromWCharArray(stringSid);
     }
 
@@ -393,30 +388,43 @@ bool createSyncRootRegistryKeys(const QString &providerName, const QString &fold
         const auto deleteKeyResult = OCC::Utility::registryDeleteKeyTree(HKEY_LOCAL_MACHINE, providerSyncRootIdRegistryKey);
         Q_ASSERT(!deleteKeyResult);
     } else {
-        QMutexLocker locker(&registeredSyncRootMutex);
-        (*registeredSyncRootKeys)[syncRootPath] = providerSyncRootIdRegistryKey;
         qCInfo(lcCfApiWrapper) << "Successfully set Registry keys for shell integration at:" << providerSyncRootIdRegistryKey << ". Progress bar will work.";
     }
 
     return !isAnyKeySetFailed;
 }
 
-bool deleteSyncRootRegistryKey(const QString &syncRootPath)
+bool deleteSyncRootRegistryKey(const QString &syncRootPath, const QString &providerName, const QString &accountDisplayName)
 {
-    const auto syncRootRegistryKeyToDelete = [&syncRootPath] {
-        QMutexLocker locker(&registeredSyncRootMutex);
-        const auto foundRegisteredSyncRootKey = (*registeredSyncRootKeys).constFind(syncRootPath);
-        return (foundRegisteredSyncRootKey != (*registeredSyncRootKeys).constEnd()) ? *foundRegisteredSyncRootKey : QString();
-    }();
+    const auto &syncRootManagerRegistryKey = R"(SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\SyncRootManager\)";
 
-    if (!syncRootRegistryKeyToDelete.isEmpty()) {
-        {
-            QMutexLocker locker(&registeredSyncRootMutex);
-            (*registeredSyncRootKeys).remove(syncRootRegistryKeyToDelete);
+    if (OCC::Utility::registryKeyExists(HKEY_LOCAL_MACHINE, syncRootManagerRegistryKey)) {
+        const auto &windowsSID = retrieveWindowsSID();
+        Q_ASSERT(!windowsSID.isEmpty());
+        if (windowsSID.isEmpty()) {
+            qCWarning(lcCfApiWrapper) << "Failed to delete Registry key for shell integration on path" << syncRootPath << ". Because windowsSID is empty.";
+            return false;
         }
-        return OCC::Utility::registryDeleteKeyTree(HKEY_LOCAL_MACHINE, syncRootRegistryKeyToDelete);
-    }
 
+        const auto &currentUserSyncRootIdPattern = QString("%1!%2!%3").arg(providerName).arg(windowsSID).arg(accountDisplayName);
+
+        bool result = true;
+
+        // walk through each registered syncRootId
+        OCC::Utility::registryWalkSubKeys(HKEY_LOCAL_MACHINE, syncRootManagerRegistryKey, [&](HKEY, const QString &syncRootId) {
+            // make sure we have matching syncRootId(providerName!windowsSID!accountDisplayName)
+            if (syncRootId.startsWith(currentUserSyncRootIdPattern)) {
+                const QString syncRootIdUserSyncRootsRegistryKey = syncRootManagerRegistryKey % syncRootId % R"(\UserSyncRoots\)";
+                // check if there is a 'windowsSID' Registry value under \UserSyncRoots and it matches the sync folder path we are removing
+                if (OCC::Utility::registryGetKeyValue(HKEY_LOCAL_MACHINE, syncRootIdUserSyncRootsRegistryKey, windowsSID).toString() == syncRootPath) {
+                    const QString syncRootIdToDelete = syncRootManagerRegistryKey % syncRootId;
+                    result = OCC::Utility::registryDeleteKeyTree(HKEY_LOCAL_MACHINE, syncRootIdToDelete);
+                    return;
+                }
+            }
+        });
+        return result;
+    }
     return true;
 }
 
@@ -459,9 +467,9 @@ OCC::Result<void, QString> OCC::CfApiWrapper::registerSyncRoot(const QString &pa
     }
 }
 
-OCC::Result<void, QString> OCC::CfApiWrapper::unregisterSyncRoot(const QString &path)
+OCC::Result<void, QString> OCC::CfApiWrapper::unregisterSyncRoot(const QString &path, const QString &providerName, const QString &accountDisplayName)
 {
-    const auto deleteRegistryKeyResult = deleteSyncRootRegistryKey(path);
+    const auto deleteRegistryKeyResult = deleteSyncRootRegistryKey(path, providerName, accountDisplayName);
     Q_ASSERT(deleteRegistryKeyResult);
 
     if (!deleteRegistryKeyResult) {

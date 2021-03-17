@@ -72,7 +72,7 @@ private:
 };
 
 OWNCLOUDSYNC_EXPORT Result<void, QString> registerSyncRoot(const QString &path, const QString &providerName, const QString &providerVersion, const QString &folderAlias, const QString &displayName, const QString &accountDisplayName);
-OWNCLOUDSYNC_EXPORT Result<void, QString> unregisterSyncRoot(const QString &path);
+OWNCLOUDSYNC_EXPORT Result<void, QString> unregisterSyncRoot(const QString &path, const QString &providerName, const QString &accountDisplayName);
 
 OWNCLOUDSYNC_EXPORT Result<ConnectionKey, QString> connectSyncRoot(const QString &path, VfsCfApi *context);
 OWNCLOUDSYNC_EXPORT Result<void, QString> disconnectSyncRoot(ConnectionKey &&key);
