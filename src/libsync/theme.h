@@ -123,6 +123,11 @@ public:
      */
     QUrl stateOfflineImageSource() const;
 
+    QUrl statusOnlineImageSource() const;
+    QUrl statusDoNotDisturbImageSource() const;
+    QUrl statusAwayImageSource() const;
+    QUrl statusInvisibleImageSource() const;
+
     /**
      * @brief configFileName
      * @return the name of the config file.
@@ -408,15 +413,15 @@ public:
      * important dependency versions.
      */
     virtual QString versionSwitchOutput() const;
-	
-	/**
+
+    /**
     * @brief Request suitable QIcon resource depending on the background colour of the parent widget.
     *
-    * This should be replaced (TODO) by a real theming implementation for the client UI 
+    * This should be replaced (TODO) by a real theming implementation for the client UI
     * (actually 2019/09/13 only systray theming).
     */
-	virtual QIcon uiThemeIcon(const QString &iconName, bool uiHasDarkBg) const;
-    
+    virtual QIcon uiThemeIcon(const QString &iconName, bool uiHasDarkBg) const;
+
     /**
      * @brief Perform a calculation to check if a colour is dark or light and accounts for different sensitivity of the human eye.
      *
@@ -425,7 +430,7 @@ public:
      * 2019/12/08: Moved here from SettingsDialog.
      */
     static bool isDarkColor(const QColor &color);
-    
+
     /**
      * @brief Return the colour to be used for HTML links (e.g. used in QLabel), based on the current app palette or given colour (Dark-/Light-Mode switching).
      *
@@ -434,7 +439,7 @@ public:
      * 2019/12/08: Implemented for the Dark Mode on macOS, because the app palette can not account for that (Qt 5.12.5).
      */
     static QColor getBackgroundAwareLinkColor(const QColor &backgroundColor);
-    
+
     /**
      * @brief Return the colour to be used for HTML links (e.g. used in QLabel), based on the current app palette (Dark-/Light-Mode switching).
      *
