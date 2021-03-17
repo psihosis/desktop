@@ -24,7 +24,7 @@
 #include <QLocalSocket>
 #include <QLoggingCategory>
 #include <QGlobalStatic>
-#include <QReadWriteLock>
+#include <QMutex>
 
 #include <sddl.h>
 #include <cfapi.h>
@@ -41,7 +41,7 @@ Q_LOGGING_CATEGORY(lcCfApiWrapper, "nextcloud.sync.vfs.cfapi.wrapper", QtInfoMsg
 namespace {
 using SyncRootKeys = QMap<QString, QString>;
 Q_GLOBAL_STATIC(SyncRootKeys, registeredSyncRootKeys)
-QReadWriteLock registeredSyncRootKeysLock;
+QMutex registeredSyncRootMutex;
 void cfApiSendTransferInfo(const CF_CONNECTION_KEY &connectionKey, const CF_TRANSFER_KEY &transferKey, NTSTATUS status, void *buffer, qint64 offset, qint64 length)
 {
 
@@ -393,7 +393,7 @@ bool createSyncRootRegistryKeys(const QString &providerName, const QString &fold
         const auto deleteKeyResult = OCC::Utility::registryDeleteKeyTree(HKEY_LOCAL_MACHINE, providerSyncRootIdRegistryKey);
         Q_ASSERT(!deleteKeyResult);
     } else {
-        QWriteLocker lock(&registeredSyncRootKeysLock);
+        QMutexLocker locker(&registeredSyncRootMutex);
         (*registeredSyncRootKeys)[syncRootPath] = providerSyncRootIdRegistryKey;
         qCInfo(lcCfApiWrapper) << "Successfully set Registry keys for shell integration at:" << providerSyncRootIdRegistryKey << ". Progress bar will work.";
     }
@@ -404,14 +404,14 @@ bool createSyncRootRegistryKeys(const QString &providerName, const QString &fold
 bool deleteSyncRootRegistryKey(const QString &syncRootPath)
 {
     const auto syncRootRegistryKeyToDelete = [&syncRootPath] {
-        QReadLocker lock(&registeredSyncRootKeysLock);
+        QMutexLocker locker(&registeredSyncRootMutex);
         const auto foundRegisteredSyncRootKey = (*registeredSyncRootKeys).constFind(syncRootPath);
         return (foundRegisteredSyncRootKey != (*registeredSyncRootKeys).constEnd()) ? *foundRegisteredSyncRootKey : QString();
     }();
 
     if (!syncRootRegistryKeyToDelete.isEmpty()) {
         {
-            QWriteLocker lock(&registeredSyncRootKeysLock);
+            QMutexLocker locker(&registeredSyncRootMutex);
             (*registeredSyncRootKeys).remove(syncRootRegistryKeyToDelete);
         }
         return OCC::Utility::registryDeleteKeyTree(HKEY_LOCAL_MACHINE, syncRootRegistryKeyToDelete);
@@ -491,7 +491,7 @@ OCC::Result<OCC::CfApiWrapper::ConnectionKey, QString> OCC::CfApiWrapper::connec
     if (result != S_OK) {
         return QString::fromWCharArray(_com_error(result).ErrorMessage());
     } else {
-        return std::move(key);
+        return { std::move(key) };
     }
 }
 

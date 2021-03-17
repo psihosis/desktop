@@ -76,7 +76,7 @@ FolderMan::FolderMan(QObject *parent)
     connect(AccountManager::instance(), &AccountManager::removeAccountFolders,
         this, &FolderMan::slotRemoveFoldersForAccount);
 
-    connect(AccountManager::instance(), &AccountManager::accountRemoved,
+    connect(AccountManager::instance(), &AccountManager::accountSyncConnectionRemoved,
         this, &FolderMan::slotAccountRemoved);
 
     connect(_lockWatcher.data(), &LockWatcher::fileUnlocked,

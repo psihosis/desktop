@@ -355,7 +355,6 @@ VfsCfApi::HydratationAndPinStates VfsCfApi::computeRecursiveHydrationAndPinState
     if (!info.exists()) {
         return {};
     }
-
     const auto effectivePin = pinState(folderPath);
     const auto pinResult = (!effectivePin && !basePinState) ? Optional<PinState>()
                          : (!effectivePin || !basePinState) ? PinState::Inherited
