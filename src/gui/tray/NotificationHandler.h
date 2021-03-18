@@ -18,7 +18,6 @@ public:
 
 signals:
     void newNotificationList(ActivityList);
-    void setDoNotDisturbStatus(const QString status);
 
 public slots:
     void slotFetchNotifications();

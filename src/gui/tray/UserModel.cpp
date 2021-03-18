@@ -626,7 +626,7 @@ bool User::isConnected() const
 
 bool User::isNotificationStatusOnline() const
 {
-    return (_account.data()->notificationStatus() == "online");
+    return _account.data()->notificationStatus() == "online";
 }
 
 void User::removeAccount() const
@@ -692,16 +692,18 @@ Q_INVOKABLE bool UserModel::isUserConnected(const int &id)
 
 Q_INVOKABLE bool UserModel::isNotificationStatusOnline(const int &id)
 {
-    if (id < 0 || id >= _users.size())
+    if (id < 0 || id >= _users.size()) {
         return false;
+    }
 
     return _users[id]->isNotificationStatusOnline();
 }
 
 Q_INVOKABLE QUrl UserModel::statusIcon(const int &id)
 {
-    if (id < 0 || id >= _users.size())
+    if (id < 0 || id >= _users.size()) {
         return {};
+    }
 
     return _users[id]->statusIcon();
 }

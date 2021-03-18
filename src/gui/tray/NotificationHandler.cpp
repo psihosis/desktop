@@ -67,7 +67,9 @@ void ServerNotificationHandler::slotEtagResponseHeaderReceived(const QByteArray 
 void ServerNotificationHandler::slotNotificationStatusReceived(const QString &status)
 {
     auto *account = qvariant_cast<AccountState *>(sender()->property(propertyAccountStateC));
-    account->setNotificationStatus(status);
+    if (account != nullptr) {
+       account->setNotificationStatus(status); 
+    }
 }
 
 void ServerNotificationHandler::slotIconDownloaded(QByteArray iconData)
